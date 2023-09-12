@@ -2,25 +2,29 @@
 ! SYS_SIZE is the number of clicks (16 bytes) to be loaded.
 ! 0x3000 is 0x30000 bytes = 196kB, more than enough for current
 ! versions of linux
-!
+!这里'!'或';' 表示程序注释语句的开始
 SYSSIZE = 0x3000
 !
 !	bootsect.s		(C) 1991 Linus Torvalds									bootsect.s的框架程序，
 !
 ! bootsect.s is loaded at 0x7c00 by the bios-startup routines, and moves
 ! iself out of the way to address 0x90000, and jumps there.
+!bootsect.s被bios-启动子程序加载到0x7c00(31KB)处，并将自己移到了地址0x90000(576KB)处，并跳转至那里
 !
 ! It then loads 'setup' directly after itself (0x90200), and the system
 ! at 0x10000, using BIOS interrupts. 
+!它然后使用BIOS中断将'setup'直接加载到自己的后面(0x90200)(576.5KB),并将system加载到地址0x10000处
 !
 ! NOTE! currently system is at most 8*65536 bytes long. This should be no
 ! problem, even in the future. I want to keep it simple. This 512 kB
 ! kernel size should be enough, especially as this doesn't contain the
 ! buffer cache as in minix
+!注意!目前的内核系统最大长度限制为(8*65536)(512KB)字节,即使是在将来这也应该没有问题的,我想让它保持简单明了.这样512KB的最大内核长度应该足够了,尤其是这里没有象minix中一样包含高速缓冲区
 !
 ! The loader has been made as simple as possible, and continuos
 ! read errors will result in a unbreakable loop. Reboot by hand. It
 ! loads pretty fast by getting whole sectors at a time whenever possible.
+!加载程序已经做得够简单了,所以持续的读出错将导致死循环.只能手动重启.只要可能,通过一次读取所有的扇区,加载过程可以做得很快
 
 .globl begtext, begdata, begbss, endtext, enddata, endbss					!全局标识符，供ld86链接使用
 .text																		!正文段
@@ -31,15 +35,15 @@ begdata:
 begbss:
 .text																		!正文段
 
-SETUPLEN = 4				! nr of setup-sectors
+SETUPLEN = 4				! nr of setup-sectors							setup程序的扇区数(setup-sectors)值
 BOOTSEG  = 0x07c0			! original address of boot-sector				BIOS 加载bootsect 代码的原始段地址
-INITSEG  = 0x9000			! we move boot here - out of the way
-SETUPSEG = 0x9020			! setup starts here
-SYSSEG   = 0x1000			! system loaded at 0x10000 (65536).
-ENDSEG   = SYSSEG + SYSSIZE		! where to stop loading
+INITSEG  = 0x9000			! we move boot here - out of the way			将bootsect移到这里 -- 避开
+SETUPSEG = 0x9020			! setup starts here								setup程序从这里开始
+SYSSEG   = 0x1000			! system loaded at 0x10000 (65536).				system模块加载到0x10000(64KB)处
+ENDSEG   = SYSSEG + SYSSIZE		! where to stop loading						停止加载的段地址
 
-! ROOT_DEV:	0x000 - same type of floppy as boot.
-!		0x301 - first partition on first drive etc
+! ROOT_DEV:	0x000 - same type of floppy as boot.							根文件系统设备使用与引导时同样的软驱设备
+!		0x301 - first partition on first drive etc							根文件系统设备在第一个硬盘的第一个分区上
 ROOT_DEV = 0x306
 
 entry start																	!告知链接程序，程序从start标号处开始执行
