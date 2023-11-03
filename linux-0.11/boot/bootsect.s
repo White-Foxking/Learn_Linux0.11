@@ -49,7 +49,7 @@ ROOT_DEV = 0x306
 entry start																	!告知链接程序，程序从start标号处开始执行
 start:
 	mov	ax,#BOOTSEG															!传送#BOOTSEG 到 ax
-	mov	ds,ax
+	mov	ds,ax	
 	mov	ax,#INITSEG
 	mov	es,ax
 	mov	cx,#256
@@ -61,15 +61,15 @@ start:
 go:	mov	ax,cs																!段寄存器cs值-->ax,用与初始化段寄存器ds和es
 	mov	ds,ax
 	mov	es,ax
-! put stack at 0x9ff00.														将stack(堆栈)放在0x9ff00
+! put stack at 0x9ff00.														将堆栈指针sp指向0x9ff00(即0x9000:0xff00)处
 	mov	ss,ax
 	mov	sp,#0xFF00		! arbitrary value >>512
 
-! load the setup-sectors directly after the bootblock.
-! Note that 'es' is already set up.
+! load the setup-sectors directly after the bootblock.						在bootsect 程序块后紧跟着加载setup模块的代码数据
+! Note that 'es' is already set up.											注意es已经设置好了
 
 load_setup:
-	mov	dx,#0x0000		! drive 0, head 0
+	mov	dx,#0x0000		! drive 0, head 0									
 	mov	cx,#0x0002		! sector 2, track 0
 	mov	bx,#0x0200		! address = 512, in INITSEG
 	mov	ax,#0x0200+SETUPLEN	! service 2, nr of sectors
@@ -80,12 +80,12 @@ load_setup:
 	int	0x13
 	j	load_setup
 
-ok_load_setup:
+ok_load_setup:	
 
-! Get disk drive parameters, specifically nr of sectors/track
+! Get disk drive parameters, specifically nr of sectors/track				取磁盘驱动器的参数,特别是每道的扇区数量
 
 	mov	dl,#0x00
-	mov	ax,#0x0800		! AH=8 is get drive parameters
+	mov	ax,#0x0800		! AH=8 is get drive parameters						获取驱动器参数
 	int	0x13
 	mov	ch,#0x00
 	seg cs
